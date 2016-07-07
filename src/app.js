@@ -17,24 +17,14 @@ import { loadSession, loadMessages, getOfflineMessages } from './store/actions'
 
 class App extends Component {
 	componentDidMount() {
-    // console.log('we start loading session here !!!!!!!!!!!!!!');
 		this.props.onload();
 
-    //AsyncStorage.clear();
-    // console.log('aaaaaaaaaaaaaaa');
-    // AsyncStorage.getItem('messages')
-    //   .then(value => console.log(value))
-    //   .catch((err) => console.log('Error adding messages: ' + err));
+    // AsyncStorage.clear();
 	}
 
 	render() {
-		//console.log('aaaaaaaaaaaaaaa')
-		//console.log('props')
-		//console.log(this.props)
-		//console.log(this.props.currentRoute)
-		//console.log(Routes)
 		const CurrentPage = Routes[this.props.currentRoute].Page
-		// console.log(page)
+		
 	  return (
 	  	<View style={styles.viewportContainer}>
 	    	<CurrentPage />
@@ -69,39 +59,4 @@ const styles = StyleSheet.create({
       backgroundColor: '#fff',
       marginTop: windowMarginTop,
     },
-    // messagesContainer: {
-    //   flex: 1,
-    // },
-    // message: {
-    //   padding: 4,
-    // },
-    // oddMessage: {
-    //   backgroundColor: '#eee',
-    // },
-    // evenMessage: {
-    //   backgroundColor: '#fff',
-    // },
-    // textInputContainer: {
-    //   height: 30,
-    //   flexDirection: 'row',
-    //   padding: 4,
-    //   backgroundColor: 'black',
-    // },
-    // textInput: {
-    //   flex: 1,
-    //   backgroundColor: 'white',
-    //   marginRight: 4,
-    // },
-    // button: {
-    //   backgroundColor: 'rgb(130, 224, 255)',
-    //   alignItems: 'center',
-    //   justifyContent: 'center',
-    //   padding: 4,
-    // },
-    // buttonTextContainer: {
-
-    // },
-    // buttonText: {
-
-    // }
   });
