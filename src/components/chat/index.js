@@ -184,6 +184,7 @@ class Chat extends Component {
       //console.log('sending message !!!');
       var selectedChannel = this.props.ui.selectedChannel;
       var messageData = {
+        chatId: selectedChannel.id,
         clientStartTime: new Date(),
         type: selectedChannel.type, 
         text: this.state.newMessageText, 
