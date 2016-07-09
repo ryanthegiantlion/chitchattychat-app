@@ -19,7 +19,6 @@ export default class MessageItem extends Component {
 
   formatDate(date)
   {
-    //return date.getHours() + ':' + date.getMinutes();
     return moment(date).format('MMMM Do, h:mm');
   }
 
@@ -29,7 +28,6 @@ export default class MessageItem extends Component {
   }
 
   render() {
-    //console.log(this.props);
     let icon = undefined;
     let receiptIcon = undefined
     let timeElapsed = undefined

@@ -44,10 +44,6 @@ function session(state = {userId: null, username: null, isLoggedIn: null}, actio
 				lastMessageTimestamp: null,
 			})
 		case actions.UPDATE_LAST_READ_TIMESTAMP:
-			//console.log('ooooooooooooo');
-			//console.log(state.lastMessageTimestamp)
-			//console.log(state.lastMessageTimestamp && (state.lastMessageTimestamp > action.timestamp))
-			//console.log(action.timestamp)
 			return Object.assign({}, state, 
 			{ 
 				userId: state.userId,
@@ -87,12 +83,16 @@ function users(state= [], action) {
 
 function messages(state= {}, action) {
 	switch (action.type) {
+		case actions.NEW_MESSAGE:
+			var newChannelMessages = {}
+			newChannelMessages[action.message.chatId] = [
+				action.message,
+				...state[action.message.chatId]
+			]
+			return Object.assign({}, state, newChannelMessages)
 		case actions.ADD_MESSAGES:
-			//console.log('herere!')
 			
 			let newMessages = Object.assign({}, state);
-			//console.log(action.messages)
-			//console.log(newMessages)
 			for (var key in action.messages) {
 				if (key in newMessages) {
 					newMessages[key] = action.messages[key].concat(newMessages[key])
@@ -105,8 +105,6 @@ function messages(state= {}, action) {
 		// we had one action for updating a message
 		case actions.MARK_MESSAGE_AS_DELIVERED:
 			var existingMessageIndex = state[action.chatId].findIndex((message) => message.clientMessageIdentifier == action.clientMessageIdentifier);
-			//console.log('nbnbnbnbnbnb')
-			//console.log(existingMessage)
 			var newChatData = {}
 			newChatData[action.chatId] = [
 					...state[action.chatId].slice(0,existingMessageIndex),
@@ -125,10 +123,6 @@ function messages(state= {}, action) {
 				}
 				messageByIds[item.receiverId][item.clientMessageIdentifier] = true;
 			});
-			//console.log('message by id')
-			//console.log(messageByIds)
-			//console.log('state')
-			//console.log(state)
 			var newMessages = {}
 			// TODO: Putting the data in here makes this function impure
 			for (key in state) {
@@ -141,7 +135,6 @@ function messages(state= {}, action) {
 					(item.receiverId in messageByIds && item.clientMessageIdentifier in messageByIds[item.receiverId])}
 				))
 			}
-			//console.log(newMessages)
 			return Object.assign({}, newMessages);
 		default:
 			return state
@@ -151,8 +144,6 @@ function messages(state= {}, action) {
 function onlineIndicators(state={}, action) {
 	switch (action.type) {
 		case actions.UPDATE_ONLINE_USERS:
-			//console.log('in reducer')
-			//console.log(action)
 			var onlineIndicators = {}
 		    action.indicators.onlineUsers.forEach(function(userId){
 		      onlineIndicators[userId] = true;
@@ -166,8 +157,6 @@ function onlineIndicators(state={}, action) {
 function typingIndicators(state={}, action) {
 	switch (action.type) {
 		case actions.UPDATE_TYPING_USERS:
-			//console.log('in reducer')
-			//console.log(action)
 			var newUserStatus = {}
 			newUserStatus[action.typingStatus.senderId] = action.typingStatus.isTyping;
 			return Object.assign({}, state, newUserStatus)

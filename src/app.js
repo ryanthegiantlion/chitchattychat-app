@@ -1,19 +1,15 @@
 import React, { Component } from 'react';
 import {
   AsyncStorage,
-  //AppRegistry,
   StyleSheet,
   Text,
   View,
-  //TextInput,
-  //TouchableOpacity,
   Platform
 } from 'react-native';
 import { connect } from 'react-redux'
 
 import Routes from './routes'
 import { loadSession, loadMessages, getOfflineMessages } from './store/actions'
-//import { loadInitialState } from './store/actions'
 
 class App extends Component {
 	componentDidMount() {

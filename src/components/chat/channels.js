@@ -16,14 +16,10 @@ export default class Channels extends Component {
   }
 
   componentDidMount() {
-    //console.log('********** Channels mountained ******************')
-    // console.log(this.props)
   }
 
   render() {
     // TODO. Change to props
-    //console.log('pepepep')
-    //console.log(this.props);
     var users = this.props.users.map((item) => <ChannelItem 
       onSelect={this.props.onDirectMessageSelect}
       type='DirectMessage'
@@ -34,8 +30,6 @@ export default class Channels extends Component {
       isTyping={this.props.typingUsers[item._id]}
       isSelected={this.props.ui.selectedChannel.id == item._id}
       hasUnreadMessages={this.props.unreadUsers[item._id]}/>)
-    //console.log('eeeeeeeeeeeeeeee')
-    //console.log(this.props)
     return (
       <TouchableOpacity style={styles.overlay} onPress={() => this.props.setMenuVisibility(false)}>
         <View style={styles.overlayInnerWrapper}>
@@ -71,8 +65,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
     left: 0,
     right: 0,
-    //flexDirection: 'row',
-    //width: 200,
   },
   overlayInnerWrapper: {
     flex: 1,
@@ -80,7 +72,6 @@ const styles = StyleSheet.create({
   },
   channelsContainer: {
     backgroundColor: '#4d394b',
-    //backgroundColor: 'green',
     flex: 3,
   },
   channelHeadingWrapper: {

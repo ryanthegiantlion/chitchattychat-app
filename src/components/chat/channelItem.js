@@ -12,8 +12,6 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 export default class ChannelItem extends Component {
 
     render() {
-      //console.log('la');
-      //console.log(this.props);
       let linkStyles = [styles.channelLink]
       let iconStyles = styles.offlineIcon
       let textStyles = [styles.channelName]
@@ -42,7 +40,6 @@ export default class ChannelItem extends Component {
       }
 
       if (this.props.isTyping) {
-        console.log('********************** we got un &**************')
         isTypingText = <Text style={styles.isTypingText}>...</Text>
       }
       

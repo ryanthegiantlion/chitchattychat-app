@@ -6,8 +6,6 @@ var { AsyncStorage, Alert } = ReactNative;
 
 var apiUrl = 'http://localhost:8080';
 var socketUrl = 'http://localhost:5000';
-//var apiUrl = 'http://10.0.0.171:8080';
-//var socketUrl = 'http://10.0.0.171:5000';
   
 //var apiUrl = 'https://intense-dusk-48409.herokuapp.com';
 //var socketUrl = 'https://safe-atoll-11440.herokuapp.com';
@@ -31,6 +29,10 @@ export const UPDATE_TYPING_USERS = 'UPDATE_TYPING_USERS'
 export const ADD_MESSAGES = 'ADD_MESSAGES'
 export const MARK_MESSAGE_AS_DELIVERED = 'MARK_MESSAGE_AS_DELIVERED'
 export const MARK_MESSAGES_AS_RECEIVED = 'MARK_MESSAGES_AS_RECEIVED'
+
+export const START_CHAT = 'START_CHAT'
+export const NEW_MESSAGE = 'NEW_MESSAGE'
+export const SET_TYPING_STATUS = 'SET_TYPING_STATUS'
 // export const STORE_AND_ADD_MESSAGES= 'STORE_AND_ADD_MESSAGES
 
 // initial state
@@ -83,11 +85,9 @@ export function selectDirectMessage(id, name) {
 
 export function login(username) {
 	return function (dispatch) {
-		console.log('username in login: ' + username);
 		var body = JSON.stringify({
 			'userName': username
 		});
-		//console.log('2: ' + body);
 		fetch(apiUrl + '/users', {
 			method: 'POST',
 			headers: {
@@ -111,11 +111,8 @@ export function loadSession() {
 		.then((value) => {
 			if (value) {
 				let sessionObj = JSON.parse(value);
-				//console.log('important!!!')
-				//console.log(sessionObj)
 				dispatch(addSession(sessionObj.userId, sessionObj.username, sessionObj.lastMessageTimestamp))
 				dispatch(changeRoute('chat'))
-				// TODO: get loadInitialStateworking and remove following dispatche
 				dispatch(loadMessages())
 				dispatch(getOfflineMessages())
 			}
@@ -196,7 +193,6 @@ export function loadUsers() {
 		.then((value) => JSON.parse(value))
 		.then((users) => {
 			dispatch(addUsers(users))
-			//console.log('done loading users: ' + JSON.stringify(users));
 		})
 		.catch((error) => { console.log('error getting users: ' + error) });
 	}
@@ -213,9 +209,6 @@ export function fetchAndSyncUsers() {
 		})
 		.then((response) => response.text())
 		.then((responseBody) => {
-			//console.log('here')
-			//console.log(responseBody);
-			//console.log('there')
 			AsyncStorage.setItem('users', responseBody)
 				.then(() => dispatch(addUsers(JSON.parse(responseBody))))
 				.catch(() => console.log('Error attempting to save users'))
@@ -263,13 +256,8 @@ export function loadMessages() {
 
 export function getOfflineMessages() {
 	return function(dispatch, getState) {
-		//console.log('state');
-		//console.log(getState())
 		var userId = getState().session.userId;
 		var lastMessageTimestamp = getState().session.lastMessageTimestamp;
-		//console.log('llllllllllll');
-		//console.log(userId);
-		//console.log(lastMessageTimestamp);
 		var url = apiUrl + '/messages/unread';
 		if (lastMessageTimestamp) {
 			url = url + '?lastMessageTimeStamp=' +  lastMessageTimestamp;
@@ -282,15 +270,12 @@ export function getOfflineMessages() {
 			}
 		})
 		.then(response => response.json())
-		//.then((data) => console.log(data))
-		//.then(() => console.log('lalaal'))
 		.then(responseJSON => {
 			if (responseJSON && responseJSON.length > 0) {
 				console.log('offline messages received');
 				messages = responseJSON;
 				var lastMessage = messages[0]
 				messages.reverse()
-				//console.log(messages)
 				dispatch(storeAndAddMessages(messages));
 				dispatch(updatelastReadTimestamp(lastMessage.timestamp))
 				dispatch(persistCurrentSession())
@@ -340,7 +325,6 @@ export function confirmMessage(message) {
 
 export function confirmReceiptMessages(messages) {
 	return function(dispatch, getState) {
-		//console.log('we got to the actyion !!!!!!!');
 		dispatch(markMessagesAsReceived(messages));
 
 		AsyncStorage.setItem('messages', JSON.stringify(getState().messages)) 
@@ -350,8 +334,6 @@ export function confirmReceiptMessages(messages) {
 }
 
 export function addMessages(messages) {
-	//console.log('pew pew pew')
-	//console.log(messages)
 	let messagesById = {}
 	messages.forEach((item) => {
 		if (item.type == 'DirectMessage') { 
@@ -374,6 +356,13 @@ export function addMessages(messages) {
 	}
 }
 
+export function newMessage(message) {
+	return {
+		type: NEW_MESSAGE,
+		message: message
+	}
+}
+
 export function storeAndAddMessages(messages) {
 	return function(dispatch, getState) {
 		dispatch(addMessages(messages))
@@ -381,5 +370,18 @@ export function storeAndAddMessages(messages) {
 		AsyncStorage.setItem('messages', JSON.stringify(getState().messages)) 
 			.then((value) => console.log('Added messages'))
 			.catch((err) => console.log('Error adding messages: ' + err));
+	}
+}
+
+export function setTypingStatus(status) {
+	return {
+		type: SET_TYPING_STATUS,
+		status: status
+	}
+}
+
+export function startChat() {
+	return {
+		type: START_CHAT
 	}
 }
