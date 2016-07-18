@@ -35,7 +35,7 @@ export default class Messages extends Component {
             timeElapsed={rowData.timeElapsed}
             timestamp={rowData.timestamp} 
             isDelivered={rowData.isDelivered}
-            isReceived={rowData.isReceived}/>}/>
+            isSent={rowData.isSent}/>}/>
       </View>
     );
   }

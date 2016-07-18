@@ -11,7 +11,7 @@ const logger = createLogger({
   colors: false,
   //collapsed: (getState, action) => action.type !== actions.UPDATE_ONLINE_USERS,
   //predicate: (getState, action) => action.type == actions.UPDATE_LAST_READ_TIMESTAMP,
-  predicate: (getState, action) => action.type == actions.NEW_MESSAGE,
+  predicate: (getState, action) => action.type == actions.MARK_MESSAGE_AS_SENT,
   stateTransformer: (state: Object) => state.messages,
   //actionTransformer: (action) => action.type
 });
@@ -19,7 +19,7 @@ const logger = createLogger({
 export default function configureStore(initialState) {
 	// NOTE: the logger middle ware must be at the end
 	return createStore(
-		rootReducer, 
+		rootReducer,
 		initialState,
 		applyMiddleware(
 			thunk,

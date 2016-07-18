@@ -8,8 +8,8 @@ import {
   updateOnlineUsers,
   updateTypingUsers,
   storeAndAddMessages,
-  confirmMessage,
-  confirmReceiptMessages,
+  confirmMessageSent,
+  confirmMessageDelivered,
   addMessages,
   updatelastReadTimestamp,
   persistCurrentSession,
@@ -19,13 +19,22 @@ import {
 
 import * as actions from './actions'
 
-console.log('pew pew');
-
 window.navigator.userAgent = "react-native";
 
 var io = require('socket.io-client/socket.io');
 
 var socket;
+
+var SocketEvents = {
+  Hello: 'hello',
+  Message: 'message',
+  MessageSentConfirmation: 'messageSentConfirmation',
+  MessageDeliveredConfirmation: 'messageDeliveredConfirmation',
+  OnlineStatus: 'onlineStatus',
+  TypingStatus: 'typingStatus',
+}
+
+var pingFuncId = undefined;
 
 function chatMiddleware(store) {
   return next => action => {
@@ -35,10 +44,15 @@ function chatMiddleware(store) {
       	initChat(store)
     }
 	 else if (socket && action.type === actions.NEW_MESSAGE) {
-      socket.emit('message', action.message);
+      console.log(action.message)
+      socket.emit(SocketEvents.Message, action.message);
     }
     else if (socket && action.type === actions.SET_TYPING_STATUS) {
-      socket.emit('typingIndicator', action.status)
+      socket.emit(SocketEvents.TypingStatus, action.status)
+    }
+    else if (socket && action.type === actions.STOP_CHAT) {
+      clearInterval(pingFuncId);
+      socket.disconnect();
     }
  
     return result;
@@ -49,37 +63,60 @@ function initChat(store) {
 	var socketUrl = 'http://localhost:5000';
 			let session = store.getState().session;
       //var socketUrl = 'https://safe-atoll-11440.herokuapp.com';
-      const options = {transports: ['websocket'], query: "userId=" + session.userId + "&userName=" + session.username };
+
+      var query = "userId=" + session.userId + "&userName=" + session.username;
+
+      if (session.lastMessageTimestamp) {
+        query = query + '&lastMessageTimeStamp=' + session.lastMessageTimestamp;
+      }
+
+      const options = {transports: ['websocket'], query: query };
       socket = io(socketUrl, options);
 
-      socket.on('message', (data) => {
+      pingFuncId = setInterval(function() {
+        //console.log('pinging server');
+        socket.emit(SocketEvents.Hello, {message: 'hello server'});
+      }, 30000);
+
+      socket.on(SocketEvents.Hello, function(data) {
+        //console.log('got hello');
+      });
+
+      socket.on(SocketEvents.Message, (data) => {
+        console.log('got message')
         store.dispatch(storeAndAddMessages([data]));
       	store.dispatch(updatelastReadTimestamp(data.timestamp));
       	store.dispatch(persistCurrentSession());
         // TODO: this will only work while we have one channel. could also prob clean this up.
        	var currentChannel = store.getState().ui.chatUI.selectedChannel;
 
-        if (data.type == 'Channel' && currentChannel.type != 'Channel') {
+        if (data.type == 'Group' && currentChannel.type != 'Group') {
+          console.log('group')
         	store.dispatch(addChatReadStatus('0', true))
         } else if (data.type == 'DirectMessage' && currentChannel.id != data.senderId) {
+          console.log('dm1')
           store.dispatch(addChatReadStatus(data.senderId, true))
         }
         if (data.type == 'DirectMessage') {
-          socket.emit('messageReceived', data);
+          console.log('dm2')
+          console.log(data)
+          socket.emit(SocketEvents.MessageDeliveredConfirmation, data);
         }
       });
-      socket.on('messageConfirmation', (data) => {
-        store.dispatch(confirmMessage(data))
+      socket.on(SocketEvents.MessageSentConfirmation, (data) => {
+        console.log('got message sent confirmation');
+        store.dispatch(confirmMessageSent(data))
       });
-      socket.on('messageReceived', (data) => {
-        store.dispatch(storeAndAddMessages([data]));
-      	store.dispatch(updatelastReadTimestamp(data.timestamp));
-      	store.dispatch(persistCurrentSession());
+      socket.on(SocketEvents.MessageDeliveredConfirmation, (data) => {
+        console.log('got delivery confirmation!')
+        // TODO. This looks like it might be wrong !
+        // Change to confirmMessageDelivered surely?
+        store.dispatch(confirmMessageDelivered(data));
       });
-      socket.on('onlineIndicators', (data) => {
+      socket.on(SocketEvents.OnlineStatus, (data) => {
         store.dispatch(updateOnlineUsers(data));
       });
-      socket.on('typingIndicator', (data) => {
+      socket.on(SocketEvents.TypingStatus, (data) => {
         store.dispatch(updateTypingUsers(data));
       });
       // socket.on('connect', function() {

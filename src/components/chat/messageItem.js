@@ -22,20 +22,20 @@ export default class MessageItem extends Component {
     return moment(date).format('MMMM Do, h:mm');
   }
 
-  onReceiptClick()
+  onDeliveryClick()
   {
     this.setState({displayTimeElapsed: true});
   }
 
   render() {
-    let icon = undefined;
-    let receiptIcon = undefined
+    let sentIcon = undefined;
+    let deliveredIcon = undefined
     let timeElapsed = undefined
-    if (this.props.isDelivered) {
-      icon = <Icon style={styles.deliveredIcon} name={'check'} />
+    if (this.props.isSent) {
+      sentIcon = <Icon style={styles.sentIcon} name={'check'} />
     }
-    if (this.props.isReceived) {
-      receiptIcon = <TouchableOpacity onPress={() => this.onReceiptClick()}><Icon style={styles.receiptIcon} name={'check'} /></TouchableOpacity>
+    if (this.props.isDelivered) {
+      deliveredIcon = <TouchableOpacity onPress={() => this.onDeliveryClick()}><Icon style={styles.deliveredIcon} name={'check'} /></TouchableOpacity>
       if (this.state.displayTimeElapsed) {
         timeElapsed = <Text>{this.props.timeElapsed}</Text>
       }
@@ -45,8 +45,8 @@ export default class MessageItem extends Component {
         <View style={styles.nameAndTimestampContainer}>
           <Text style={styles.name}>{this.props.senderName}</Text>
           <Text style={styles.timestamp}>{this.formatDate(this.props.timestamp)}</Text>
-          {icon}
-          {receiptIcon}
+          {sentIcon}
+          {deliveredIcon}
           {timeElapsed}
         </View>
         <Text>
@@ -74,12 +74,12 @@ const styles = StyleSheet.create({
     color: '#666',
     fontSize: 12,
   },
-  deliveredIcon: {
+  sentIcon: {
     color: 'green',
     marginLeft: 10,
     fontSize: 12,
   },
-  receiptIcon: {
+  deliveredIcon: {
     color: 'green',
     fontSize: 12,
   }

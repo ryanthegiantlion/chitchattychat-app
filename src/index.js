@@ -14,7 +14,7 @@ const initialState = {
   ui: {currentRoute: 'loading', chatUI: {
     isMenuVisible: false, 
     selectedChannel: {
-      type: 'Channel',
+      type: 'Group',
       id: 0,
       name: 'General'
     }

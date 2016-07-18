@@ -40,7 +40,7 @@ export default class Channels extends Component {
               <ChannelItem 
                 onSelect={this.props.onChannelSelect}
                 userName='General'
-                type='Channel'
+                type='Group'
                 _id={0}
                 isSelected={this.props.ui.selectedChannel.id == 0}
                 hasUnreadMessages={this.props.unreadUsers['0']}/>

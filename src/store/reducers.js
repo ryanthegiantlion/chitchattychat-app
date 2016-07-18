@@ -1,7 +1,7 @@
 import { combineReducers } from 'redux'
 import * as actions from './actions'
 
-function ui(state = {currentRoute: 'loading', chatUI: {isMenuVisible: false, selectedChannel: {type: 'Channel', id: 0, name: 'General' }}}, action) {
+function ui(state = {currentRoute: 'loading', chatUI: {isMenuVisible: false, selectedChannel: {type: 'Group', id: 0, name: 'General' }}}, action) {
 	switch (action.type) {
 		case actions.CHANGE_ROUTE:
 			return Object.assign({}, state, { currentRoute: action.route })
@@ -15,7 +15,7 @@ function ui(state = {currentRoute: 'loading', chatUI: {isMenuVisible: false, sel
 				{}, 
 				state, 
 				{ chatUI: { isMenuVisible: false, selectedChannel: {
-					type: 'Channel',
+					type: 'Group',
 					id: action.id,
 					name: action.name
 				}}})
@@ -85,9 +85,11 @@ function messages(state= {}, action) {
 	switch (action.type) {
 		case actions.NEW_MESSAGE:
 			var newChannelMessages = {}
+			var existingMessages = state[action.message.chatId] || []
+
 			newChannelMessages[action.message.chatId] = [
 				action.message,
-				...state[action.message.chatId]
+				...existingMessages
 			]
 			return Object.assign({}, state, newChannelMessages)
 		case actions.ADD_MESSAGES:
@@ -103,16 +105,18 @@ function messages(state= {}, action) {
 			return newMessages;
 		// TODO: This reduced could be cleaned up quite a bit if
 		// we had one action for updating a message
-		case actions.MARK_MESSAGE_AS_DELIVERED:
+		case actions.MARK_MESSAGE_AS_SENT:
 			var existingMessageIndex = state[action.chatId].findIndex((message) => message.clientMessageIdentifier == action.clientMessageIdentifier);
 			var newChatData = {}
+			console.log(action);
 			newChatData[action.chatId] = [
 					...state[action.chatId].slice(0,existingMessageIndex),
-					Object.assign({}, state[action.chatId][existingMessageIndex], {isDelivered: true}),
+					Object.assign({}, state[action.chatId][existingMessageIndex], {isSent: true}),
 					...state[action.chatId].slice(existingMessageIndex+1)
 				];
 			return Object.assign({}, state, newChatData);
-		case actions.MARK_MESSAGES_AS_RECEIVED:
+		case actions.MARK_MESSAGE_AS_DELIVERED:
+			console.log('123')
 			// TODO: surely there is a better way to do this
 			// we should prob start getting better indexes on our messages
 			// e.g a lookup by clientMessageIdentifier would be great
@@ -131,7 +135,7 @@ function messages(state= {}, action) {
 					item,
 					{clientEndTime: currentTime},
 					{timeElapsed: item['timeElapsed'] || (currentTime - item.clientStartTime)},
-					{isReceived: item['isReceived'] || 
+					{isDelivered: item['isDelivered'] || 
 					(item.receiverId in messageByIds && item.clientMessageIdentifier in messageByIds[item.receiverId])}
 				))
 			}

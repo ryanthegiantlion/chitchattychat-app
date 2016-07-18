@@ -28,9 +28,10 @@ export const UPDATE_TYPING_USERS = 'UPDATE_TYPING_USERS'
 
 export const ADD_MESSAGES = 'ADD_MESSAGES'
 export const MARK_MESSAGE_AS_DELIVERED = 'MARK_MESSAGE_AS_DELIVERED'
-export const MARK_MESSAGES_AS_RECEIVED = 'MARK_MESSAGES_AS_RECEIVED'
+export const MARK_MESSAGE_AS_SENT = 'MARK_MESSAGE_AS_SENT'
 
 export const START_CHAT = 'START_CHAT'
+export const STOP_CHAT = 'STOP_CHAT'
 export const NEW_MESSAGE = 'NEW_MESSAGE'
 export const SET_TYPING_STATUS = 'SET_TYPING_STATUS'
 // export const STORE_AND_ADD_MESSAGES= 'STORE_AND_ADD_MESSAGES
@@ -114,7 +115,6 @@ export function loadSession() {
 				dispatch(addSession(sessionObj.userId, sessionObj.username, sessionObj.lastMessageTimestamp))
 				dispatch(changeRoute('chat'))
 				dispatch(loadMessages())
-				dispatch(getOfflineMessages())
 			}
 			else {
 				dispatch(changeRoute('login'))
@@ -296,26 +296,26 @@ export function setInitialMessages(messages) {
 
 // TODO: Consider merging the two actions
 // into an 'update message' action
-export function markMessageAsDelivered(message) {
+export function markMessageAsSent(message) {
 	return {
-		type: MARK_MESSAGE_AS_DELIVERED,
+		type: MARK_MESSAGE_AS_SENT,
 		chatId: message.receiverId,
 		clientMessageIdentifier: message.clientMessageIdentifier
 	}
 }
 
-export function markMessagesAsReceived(messages) {
+export function markMessageAsDelivered(messages) {
 	return {
-		type: MARK_MESSAGES_AS_RECEIVED,
+		type: MARK_MESSAGE_AS_DELIVERED,
 		messages: messages
 	}
 }
 
-export function confirmMessage(message) {
+export function confirmMessageSent(message) {
 	return function(dispatch, getState) {
 		dispatch(updatelastReadTimestamp(message.timestamp));
 		dispatch(persistCurrentSession());
-		dispatch(markMessageAsDelivered(message));
+		dispatch(markMessageAsSent(message));
 
 		AsyncStorage.setItem('messages', JSON.stringify(getState().messages)) 
 			.then((value) => console.log('Added messages to storage'))
@@ -323,9 +323,9 @@ export function confirmMessage(message) {
 	}
 }
 
-export function confirmReceiptMessages(messages) {
+export function confirmMessageDelivered(messages) {
 	return function(dispatch, getState) {
-		dispatch(markMessagesAsReceived(messages));
+		dispatch(markMessageAsDelivered(messages));
 
 		AsyncStorage.setItem('messages', JSON.stringify(getState().messages)) 
 			.then((value) => console.log('Added messages to storage'))
