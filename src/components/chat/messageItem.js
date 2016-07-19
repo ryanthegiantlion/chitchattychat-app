@@ -5,11 +5,34 @@ import {
   Text,
   View,
   TouchableOpacity,
+  Image,
 } from 'react-native';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 var moment = require('moment');
+
+class ImageBody extends Component {
+  render() {
+    return (
+      <View style={styles.imageContainer}>
+        <Image style={styles.image} source={{uri: this.props.url}} resizeMode={Image.resizeMode.cover}/>
+        <View style={{flex: 1}}></View>
+      </View>
+    )
+  }
+}
+
+class TextBody extends Component {
+  render() {
+
+    return (
+      <Text>
+        {this.props.text}
+      </Text>
+    )
+  }
+}
 
 export default class MessageItem extends Component {
   constructor(props) {
@@ -31,6 +54,7 @@ export default class MessageItem extends Component {
     let sentIcon = undefined;
     let deliveredIcon = undefined
     let timeElapsed = undefined
+    let body = undefined
     if (this.props.isSent) {
       sentIcon = <Icon style={styles.sentIcon} name={'check'} />
     }
@@ -39,6 +63,13 @@ export default class MessageItem extends Component {
       if (this.state.displayTimeElapsed) {
         timeElapsed = <Text>{this.props.timeElapsed}</Text>
       }
+    }
+    if (this.props.body.type == 'TextMessage') {
+      body = <TextBody {...this.props.body} />
+    } else if (this.props.body.type == 'Image') {
+      body = <ImageBody {...this.props.body} />
+    } else {
+      throw 'Unknown Message Body Type!'
     }
     return (
       <View style={styles.messageContainer}>
@@ -49,9 +80,7 @@ export default class MessageItem extends Component {
           {deliveredIcon}
           {timeElapsed}
         </View>
-        <Text>
-          {this.props.text}
-        </Text>
+        {body}
       </View>
     );
   }
@@ -82,5 +111,13 @@ const styles = StyleSheet.create({
   deliveredIcon: {
     color: 'green',
     fontSize: 12,
+  },
+  imageContainer: {
+    height: 100,
+    flexDirection: 'row'
+  },
+  image: {
+    margin: 10,
+    flex: 1,
   }
 });

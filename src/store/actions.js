@@ -336,18 +336,10 @@ export function confirmMessageDelivered(messages) {
 export function addMessages(messages) {
 	let messagesById = {}
 	messages.forEach((item) => {
-		if (item.type == 'DirectMessage') { 
-			if (item.senderId in messagesById) {
-				messagesById[item.senderId].push(item);
-			} else {
-				messagesById[item.senderId] = [item];
-			}
+		if (item.chatId in messagesById) {
+			messagesById[item.chatId].push(item);
 		} else {
-			if (!messagesById['0']) {
-				messagesById['0'] = [item]
-			} else {
-				messagesById['0'].push(item);
-			}
+			messagesById[item.chatId] = [item];
 		}
 	});
 	return {

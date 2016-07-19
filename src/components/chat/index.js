@@ -56,6 +56,7 @@ class Chat extends Component {
         height: 0
       };
 
+      this.imageUrlRegex = /^https?:\/\/.*(jpg|png|gif|bmp)/;
       this.isTyping = false;
       this.typingTimeoutFunc = undefined;
     }
@@ -90,6 +91,20 @@ class Chat extends Component {
         s4() + '-' + s4() + s4() + s4();
     }
 
+    getMessageBody(text) {
+      if (this.imageUrlRegex.test(text)) {
+        return {
+          type: 'Image',
+          url: text
+        }
+      } else {
+        return {
+          type: 'TextMessage',
+          text: text
+        }
+      }
+    }
+
     sendMessage() {
       clearTimeout(this.typingTimeoutFunc);
       this.clearTypingIndicator();
@@ -97,11 +112,12 @@ class Chat extends Component {
       var messageData = {
         chatId: selectedChannel.id,
         clientStartTime: new Date(),
-        type: selectedChannel.type, 
-        text: this.state.newMessageText, 
+        type: selectedChannel.type,
         senderName: this.props.session.username, 
         receiverId: selectedChannel.id, 
-        clientMessageIdentifier: this.guid()};
+        clientMessageIdentifier: this.guid(),
+        body: this.getMessageBody(this.state.newMessageText),
+      };
       this.setState({newMessageText: '', height: 0})
       messageData.senderId = selectedChannel.id;
       this.props.onMessageSend(messageData);

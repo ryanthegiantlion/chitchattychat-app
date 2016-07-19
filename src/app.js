@@ -15,7 +15,7 @@ class App extends Component {
 	componentDidMount() {
 		this.props.onload();
 
-    //AsyncStorage.clear();
+    // AsyncStorage.clear();
 	}
 
 	render() {

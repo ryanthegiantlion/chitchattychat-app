@@ -31,7 +31,7 @@ export default class Messages extends Component {
           renderRow={(rowData, sectionID, rowID) => <MessageItem 
             key={`${sectionID}-${rowID}`} 
             senderName={rowData.senderName} 
-            text={rowData.text} 
+            body={rowData.body} 
             timeElapsed={rowData.timeElapsed}
             timestamp={rowData.timestamp} 
             isDelivered={rowData.isDelivered}
