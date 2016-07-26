@@ -34,7 +34,6 @@ export const START_CHAT = 'START_CHAT'
 export const STOP_CHAT = 'STOP_CHAT'
 export const NEW_MESSAGE = 'NEW_MESSAGE'
 export const SET_TYPING_STATUS = 'SET_TYPING_STATUS'
-// export const STORE_AND_ADD_MESSAGES= 'STORE_AND_ADD_MESSAGES
 
 // initial state
 
@@ -66,18 +65,19 @@ export function setChannelMenuVisibility(isVisible) {
 	}
 }
 
-export function selectChannel(id, name) {
+export function selectChannel(chatId, name) {
 	return {
 		type: SELECT_CHANNEL,
-		id: id,
+		chatId: chatId,
 		name: name
 	}
 }
 
-export function selectDirectMessage(id, name) {
+export function selectDirectMessage(chatId, userId, name) {
 	return {
 		type: SELECT_USER,
-		id: id,
+		chatId: chatId,
+		userId: userId,
 		name: name
 	}
 }
@@ -139,7 +139,6 @@ export function removeSession() {
 	}
 }
 
-// TODO: eeeew ! terroble naming !!1
 export function persistCurrentSession() {
 	return function(dispatch, getState) {
 		var currentSession = getState().session
@@ -185,8 +184,6 @@ export function addUsers(users) {
 	}
 }
 
-// TODO: Perhaps merge the following with fethc and sync 
-// to create a load, fetch and sync method
 export function loadUsers() {
 	return function(dispatch) {
 		AsyncStorage.getItem('users')
@@ -198,13 +195,13 @@ export function loadUsers() {
 	}
 }
 
-// Note how we break up persistence for the sessions action. Which is better?
-export function fetchAndSyncUsers() {
+export function fetchAndSyncUsers(userId) {
 	return function(dispatch) {
 		fetch(apiUrl + '/users', {
 			headers: {
 				'Accept': 'Application/json',
-				'Content-Type': 'Application/json; charset=UTF-8'
+				'Content-Type': 'Application/json; charset=UTF-8',
+				'UserId': userId
 			}
 		})
 		.then((response) => response.text())
@@ -214,8 +211,6 @@ export function fetchAndSyncUsers() {
 				.catch(() => console.log('Error attempting to save users'))
 			return responseBody;
 		})
-		//.then((response) => JSON.parse(response))
-		//.then((responseJSON) => despatch(addUsers(responseJSON)))
 		.catch(err => console.log('Error during fetch and sync: ' + err));
 	}
 }
@@ -266,13 +261,12 @@ export function getOfflineMessages() {
 			headers: {
 				'Accept': 'Application/json',
 				'Content-Type': 'Application/json; charset=UTF-8',
-				'User-Id': userId
+				'UserId': userId
 			}
 		})
 		.then(response => response.json())
 		.then(responseJSON => {
 			if (responseJSON && responseJSON.length > 0) {
-				console.log('offline messages received');
 				messages = responseJSON;
 				var lastMessage = messages[0]
 				messages.reverse()
@@ -280,7 +274,6 @@ export function getOfflineMessages() {
 				dispatch(updatelastReadTimestamp(lastMessage.timestamp))
 				dispatch(persistCurrentSession())
 			} else {
-				console.log('no offline messages received');
 			}
 		})
 		.catch((err) => console.log('error fetching unread messages: ' + err));
@@ -294,12 +287,10 @@ export function setInitialMessages(messages) {
 	}
 }
 
-// TODO: Consider merging the two actions
-// into an 'update message' action
 export function markMessageAsSent(message) {
 	return {
 		type: MARK_MESSAGE_AS_SENT,
-		chatId: message.receiverId,
+		chatId: message.chatId,
 		clientMessageIdentifier: message.clientMessageIdentifier
 	}
 }

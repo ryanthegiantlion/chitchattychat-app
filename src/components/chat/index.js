@@ -15,7 +15,9 @@ import { connect } from 'react-redux'
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-window.navigator.userAgent = "react-native";
+if (!window.navigator.userAgent) {
+  window.navigator.userAgent = "react-native";
+}
 
 var io = require('socket.io-client/socket.io');
 
@@ -23,18 +25,9 @@ var io = require('socket.io-client/socket.io');
 import {
   selectChannel,
   selectDirectMessage,
-  changeRoute, 
   setChannelMenuVisibility, 
   loadUsers, 
   fetchAndSyncUsers,
-  updateOnlineUsers,
-  updateTypingUsers,
-  storeAndAddMessages,
-  confirmMessage,
-  confirmReceiptMessages,
-  addMessages,
-  updatelastReadTimestamp,
-  persistCurrentSession,
   addChatReadStatus,
   removeSession,
   startChat,
@@ -64,7 +57,7 @@ class Chat extends Component {
     componentDidMount() {
       DeviceEventEmitter.addListener('keyboardWillShow', this.keyboardWillShow.bind(this))
       DeviceEventEmitter.addListener('keyboardWillHide', this.keyboardWillHide.bind(this))
-      this.props.onMount();
+      this.props.onMount(this.props.session.userId);
     }
 
     componentWillUnmount() {
@@ -110,11 +103,11 @@ class Chat extends Component {
       this.clearTypingIndicator();
       var selectedChannel = this.props.ui.selectedChannel;
       var messageData = {
-        chatId: selectedChannel.id,
+        chatId: selectedChannel.chatId,
         clientStartTime: new Date(),
         type: selectedChannel.type,
         senderName: this.props.session.username, 
-        receiverId: selectedChannel.id, 
+        receiverId: selectedChannel.userId, 
         clientMessageIdentifier: this.guid(),
         body: this.getMessageBody(this.state.newMessageText),
       };
@@ -168,7 +161,7 @@ class Chat extends Component {
 
       var selectedChannel = this.props.ui.selectedChannel
 
-      if (selectedChannel.type == 'DirectMessage' && this.props.typingUsers[selectedChannel.id]) {
+      if (selectedChannel.type == 'DirectMessage' && selectedChannel.userId && this.props.typingUsers[selectedChannel.userId]) {
         isTyping = <Text style={styles.isTypingText}>...</Text>
       }
 
@@ -283,15 +276,13 @@ var mapStateToProps = function(state) {
   return {
     ui: state.ui.chatUI,
     channels: state.channels,
-    // TODO: prob best to no let this get into the state in the first place
-    // Actually, api should prob not return calling user
     users: state.users.filter((user) => user._id != state.session.userId),
     messages: state.messages,
     onlineUsers: state.onlineIndicators,
     unreadUsers: state.unreadIndicators,
     typingUsers: state.typingIndicators,
     session: state.session,
-    currentMessages: ds.cloneWithRows(state.messages[state.ui.chatUI.selectedChannel.id] || []),
+    currentMessages: ds.cloneWithRows(state.messages[state.ui.chatUI.selectedChannel.chatId] || []),
   }
 }
 
@@ -299,32 +290,22 @@ var mapStateToProps = function(state) {
 // TODO: A lot of these are no longer being used
 var mapDispatchToProps = (dispatch) => {
   return {
-    onUpdateRoute: (route) => dispatch(changeRoute(route)),
     setMenuVisibility: (isVisible) => dispatch(setChannelMenuVisibility(isVisible)),
-    onMount: () => {
+    onMount: (userId) => {
       dispatch(loadUsers());
-      dispatch(fetchAndSyncUsers());
+      dispatch(fetchAndSyncUsers(userId));
       dispatch(startChat());
     },
-    onChannelSelect: (id, name) => {
-      dispatch(addChatReadStatus(id, false));
-      dispatch(selectChannel(id, name));
+    onChannelSelect: (chatId, userId, name) => {
+      dispatch(addChatReadStatus(chatId, false));
+      dispatch(selectChannel(chatId, name));
     },
-    onDirectMessageSelect: (id, name) => {
-      dispatch(addChatReadStatus(id, false));
-      dispatch(selectDirectMessage(id, name))
+    onDirectMessageSelect: (chatId, userId, name) => {
+      dispatch(addChatReadStatus(chatId, false));
+      dispatch(selectDirectMessage(chatId, userId, name))
     },
-    onSocketOnlineIndicators: (users) => dispatch(updateOnlineUsers(users)),
-    onSocketTypingIndicators: (userTypingStatus) => dispatch(updateTypingUsers(userTypingStatus)),
     onMessageSend: (message) => dispatch(newMessage(message)),
-    onMessageReceived: (message) => {
-      dispatch(storeAndAddMessages([message]));
-      dispatch(updatelastReadTimestamp(message.timestamp));
-      dispatch(persistCurrentSession());
-    },
     onChangeTypingStatus: (status) => dispatch(setTypingStatus(status)),
-    onMessageConfirmation: (message) => dispatch(confirmMessage(message)),
-    onMessagesReceivedConfirmation: (messages) => dispatch(confirmReceiptMessages(messages)),
     onUnseenMessage: (chatId) => dispatch(addChatReadStatus(chatId, true)),
     onLogout: () => dispatch(removeSession())
   }

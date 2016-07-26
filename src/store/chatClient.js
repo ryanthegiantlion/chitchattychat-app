@@ -19,7 +19,9 @@ import {
 
 import * as actions from './actions'
 
-window.navigator.userAgent = "react-native";
+if (!window.navigator.userAgent) {
+  window.navigator.userAgent = "react-native";
+}
 
 var io = require('socket.io-client/socket.io');
 
@@ -83,34 +85,24 @@ function initChat(store) {
       });
 
       socket.on(SocketEvents.Message, (data) => {
-        console.log('got message')
         store.dispatch(storeAndAddMessages([data]));
       	store.dispatch(updatelastReadTimestamp(data.timestamp));
       	store.dispatch(persistCurrentSession());
-        // TODO: this will only work while we have one channel. could also prob clean this up.
        	var currentChannel = store.getState().ui.chatUI.selectedChannel;
 
         if (data.type == 'Group' && currentChannel.type != 'Group') {
-          console.log('group')
         	store.dispatch(addChatReadStatus('0', true))
         } else if (data.type == 'DirectMessage' && currentChannel.id != data.senderId) {
-          console.log('dm1')
           store.dispatch(addChatReadStatus(data.senderId, true))
         }
         if (data.type == 'DirectMessage') {
-          console.log('dm2')
-          console.log(data)
           socket.emit(SocketEvents.MessageDeliveredConfirmation, data);
         }
       });
       socket.on(SocketEvents.MessageSentConfirmation, (data) => {
-        console.log('got message sent confirmation');
         store.dispatch(confirmMessageSent(data))
       });
       socket.on(SocketEvents.MessageDeliveredConfirmation, (data) => {
-        console.log('got delivery confirmation!')
-        // TODO. This looks like it might be wrong !
-        // Change to confirmMessageDelivered surely?
         store.dispatch(confirmMessageDelivered(data));
       });
       socket.on(SocketEvents.OnlineStatus, (data) => {

@@ -24,11 +24,12 @@ export default class Channels extends Component {
       onSelect={this.props.onDirectMessageSelect}
       type='DirectMessage'
       key={item._id}
-      _id={item._id} 
+      chatId={item.chatId}
+      userId={item._id}
       userName={item.userName} 
       isOnline={item._id in this.props.onlineUsers}
       isTyping={this.props.typingUsers[item._id]}
-      isSelected={this.props.ui.selectedChannel.id == item._id}
+      isSelected={this.props.ui.selectedChannel.chatId == item.chatId}
       hasUnreadMessages={this.props.unreadUsers[item._id]}/>)
     return (
       <TouchableOpacity style={styles.overlay} onPress={() => this.props.setMenuVisibility(false)}>
@@ -41,8 +42,8 @@ export default class Channels extends Component {
                 onSelect={this.props.onChannelSelect}
                 userName='General'
                 type='Group'
-                _id={0}
-                isSelected={this.props.ui.selectedChannel.id == 0}
+                chatId={0}
+                isSelected={this.props.ui.selectedChannel.chatId == 0}
                 hasUnreadMessages={this.props.unreadUsers['0']}/>
             <View style={[{marginTop: 16},styles.channelHeadingWrapper]}>
               <Text style={styles.channelHeading}>DIRECT MESSAGES</Text>

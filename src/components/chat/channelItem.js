@@ -45,7 +45,7 @@ export default class ChannelItem extends Component {
       
       return (
         <View style={styles.channelContinaer}>
-          <TouchableOpacity style={linkStyles} onPress={() => this.props.onSelect(this.props._id, this.props.userName)}>
+          <TouchableOpacity style={linkStyles} onPress={() => this.props.onSelect(this.props.chatId, this.props.userId, this.props.userName)}>
             <Icon style={iconStyles} name={icon} size={16}/>
             <Text style={textStyles}>{this.props.userName}</Text>
             {isTypingText}

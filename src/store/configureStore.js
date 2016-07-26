@@ -11,7 +11,7 @@ const logger = createLogger({
   colors: false,
   //collapsed: (getState, action) => action.type !== actions.UPDATE_ONLINE_USERS,
   //predicate: (getState, action) => action.type == actions.UPDATE_LAST_READ_TIMESTAMP,
-  predicate: (getState, action) => action.type == actions.MARK_MESSAGE_AS_SENT,
+  predicate: (getState, action) => action.type == actions.NEW_MESSAGE,
   stateTransformer: (state: Object) => state.messages,
   //actionTransformer: (action) => action.type
 });

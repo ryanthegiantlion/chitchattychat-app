@@ -1,7 +1,7 @@
 import { combineReducers } from 'redux'
 import * as actions from './actions'
 
-function ui(state = {currentRoute: 'loading', chatUI: {isMenuVisible: false, selectedChannel: {type: 'Group', id: 0, name: 'General' }}}, action) {
+function ui(state = {currentRoute: 'loading', chatUI: {isMenuVisible: false, selectedChannel: {type: 'Group', chatId: 0, userId: null, name: 'General' }}}, action) {
 	switch (action.type) {
 		case actions.CHANGE_ROUTE:
 			return Object.assign({}, state, { currentRoute: action.route })
@@ -16,7 +16,8 @@ function ui(state = {currentRoute: 'loading', chatUI: {isMenuVisible: false, sel
 				state, 
 				{ chatUI: { isMenuVisible: false, selectedChannel: {
 					type: 'Group',
-					id: action.id,
+					chatId: action.chatId,
+					userId: null,
 					name: action.name
 				}}})
 		case actions.SELECT_USER:
@@ -25,7 +26,8 @@ function ui(state = {currentRoute: 'loading', chatUI: {isMenuVisible: false, sel
 				state, 
 				{ chatUI: { isMenuVisible: false, selectedChannel: {
 					type: 'DirectMessage',
-					id: action.id,
+					chatId: action.chatId,
+					userId: action.userId,
 					name: action.name
 				}}})
 		default:
@@ -107,8 +109,8 @@ function messages(state= {}, action) {
 		// we had one action for updating a message
 		case actions.MARK_MESSAGE_AS_SENT:
 			var existingMessageIndex = state[action.chatId].findIndex((message) => message.clientMessageIdentifier == action.clientMessageIdentifier);
+			
 			var newChatData = {}
-			console.log(action);
 			newChatData[action.chatId] = [
 					...state[action.chatId].slice(0,existingMessageIndex),
 					Object.assign({}, state[action.chatId][existingMessageIndex], {isSent: true}),
@@ -116,16 +118,15 @@ function messages(state= {}, action) {
 				];
 			return Object.assign({}, state, newChatData);
 		case actions.MARK_MESSAGE_AS_DELIVERED:
-			console.log('123')
 			// TODO: surely there is a better way to do this
 			// we should prob start getting better indexes on our messages
 			// e.g a lookup by clientMessageIdentifier would be great
 			var messageByIds = {}
 			action.messages.forEach(item => {
-				if (!(item.receiverId in messageByIds)) {
-					messageByIds[item.receiverId] = {}
+				if (!(item.chatId in messageByIds)) {
+					messageByIds[item.chatId] = {}
 				}
-				messageByIds[item.receiverId][item.clientMessageIdentifier] = true;
+				messageByIds[item.chatId][item.clientMessageIdentifier] = true;
 			});
 			var newMessages = {}
 			// TODO: Putting the data in here makes this function impure
@@ -136,7 +137,7 @@ function messages(state= {}, action) {
 					{clientEndTime: currentTime},
 					{timeElapsed: item['timeElapsed'] || (currentTime - item.clientStartTime)},
 					{isDelivered: item['isDelivered'] || 
-					(item.receiverId in messageByIds && item.clientMessageIdentifier in messageByIds[item.receiverId])}
+					(item.chatId in messageByIds && item.clientMessageIdentifier in messageByIds[item.chatId])}
 				))
 			}
 			return Object.assign({}, newMessages);
@@ -193,7 +194,7 @@ const appReducer = combineReducers({
 // Also does this follow redux principles? 
 const rootReducer = (state, action) => {
   if (action.type === actions.LOGOUT) {
-    state = Object.assign({}, {ui:{currentRoute: 'login', chatUI: {isMenuVisible: false, selectedChannel: {type: 'Channel', id: 0, name: 'General' }}}})
+    state = Object.assign({}, {ui:{currentRoute: 'login', chatUI: {isMenuVisible: false, selectedChannel: {type: 'Channel', chatId: 0, userId: null, name: 'General' }}}})
   }
 
   return appReducer(state, action)

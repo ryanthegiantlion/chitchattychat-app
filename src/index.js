@@ -1,4 +1,6 @@
-window.navigator.userAgent = "react-native";
+if (!window.navigator.userAgent) {
+  window.navigator.userAgent = "react-native";
+}
 
 import React, { Component } from 'react';
 import {
@@ -15,7 +17,8 @@ const initialState = {
     isMenuVisible: false, 
     selectedChannel: {
       type: 'Group',
-      id: 0,
+      chatId: 0,
+      userId: null,
       name: 'General'
     }
   }},
