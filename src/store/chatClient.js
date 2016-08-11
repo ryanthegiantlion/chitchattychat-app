@@ -62,9 +62,9 @@ function chatMiddleware(store) {
 }
 
 function initChat(store) {
-	var socketUrl = 'http://localhost:5000';
+	//var socketUrl = 'http://localhost:5000';
 			let session = store.getState().session;
-      //var socketUrl = 'https://safe-atoll-11440.herokuapp.com';
+      var socketUrl = 'https://immense-lowlands-90076.herokuapp.com';
 
       var query = "userId=" + session.userId + "&userName=" + session.username;
 

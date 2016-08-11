@@ -4,11 +4,11 @@ var { AsyncStorage, Alert } = ReactNative;
 
 // endpoints
 
-var apiUrl = 'http://localhost:8080';
-var socketUrl = 'http://localhost:5000';
+//var apiUrl = 'http://localhost:8080';
+//var socketUrl = 'http://localhost:5000';
   
-//var apiUrl = 'https://intense-dusk-48409.herokuapp.com';
-//var socketUrl = 'https://safe-atoll-11440.herokuapp.com';
+var apiUrl = 'https://desolate-savannah-81272.herokuapp.com';
+var socketUrl = 'https://immense-lowlands-90076.herokuapp.com';
 
 export const CHANGE_ROUTE = 'CHANGE_ROUTE'
 export const SET_CHANNEL_MENU_VISIBLITY = 'SET_CHANNEL_MENU_VISIBLITY'
