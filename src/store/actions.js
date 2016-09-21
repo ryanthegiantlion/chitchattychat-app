@@ -1,14 +1,12 @@
 var ReactNative = require('react-native');
+var config = require('../config').config;
 
 var { AsyncStorage, Alert } = ReactNative;
 
 // endpoints
 
-var apiUrl = 'http://localhost:8082';
-var socketUrl = 'http://localhost:5000';
-  
-//var apiUrl = 'https://intense-dusk-48409.herokuapp.com';
-//var socketUrl = 'https://safe-atoll-11440.herokuapp.com';
+var apiUrl = config.apiUrl;
+var socketUrl = config.socketUrl;
 
 export const CHANGE_ROUTE = 'CHANGE_ROUTE'
 export const SET_CHANNEL_MENU_VISIBLITY = 'SET_CHANNEL_MENU_VISIBLITY'

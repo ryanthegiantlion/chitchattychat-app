@@ -17,6 +17,8 @@ import {
   removeSession
 } from './actions'
 
+var config = require('../config').config;
+
 import * as actions from './actions'
 
 if (!window.navigator.userAgent) {
@@ -30,6 +32,7 @@ var socket;
 var SocketEvents = {
   Hello: 'hello',
   Message: 'message',
+  OfflineMessages: 'offlineMessages',
   MessageSentConfirmation: 'messageSentConfirmation',
   MessageDeliveredConfirmation: 'messageDeliveredConfirmation',
   OnlineStatus: 'onlineStatus',
@@ -62,9 +65,7 @@ function chatMiddleware(store) {
 }
 
 function initChat(store) {
-	var socketUrl = 'http://localhost:5000';
 	let session = store.getState().session;
-  //var socketUrl = 'https://safe-atoll-11440.herokuapp.com';
 
   var query = "userId=" + session.userId + "&userName=" + session.username;
 
@@ -73,7 +74,7 @@ function initChat(store) {
   }
 
   const options = {transports: ['websocket'], query: query };
-  socket = io(socketUrl, options);
+  socket = io(config.socketUrl, options);
 
   pingFuncId = setInterval(function() {
     //console.log('pinging server');
@@ -98,6 +99,32 @@ function initChat(store) {
     if (data.type == 'DirectMessage') {
       socket.emit(SocketEvents.MessageDeliveredConfirmation, data);
     }
+  });
+  socket.on(SocketEvents.OfflineMessages, (data) => {
+    // TODO: Fix this ordering mess sometime!
+    // Make sure you change the timestamp indexes if you remove the .reverse() !!!
+    if (data && data.length > 0) {
+      data = data.reverse();
+      store.dispatch(storeAndAddMessages(data));
+      
+      var currentChannel = store.getState().ui.chatUI.selectedChannel;
+
+      data.forEach((item) => { 
+        if (item.type == 'Group' && currentChannel.type != 'Group') {
+          store.dispatch(addChatReadStatus('0', true))
+        } else if (item.type == 'DirectMessage' && currentChannel.id != item.senderId) {
+          store.dispatch(addChatReadStatus(item.senderId, true))
+        }
+        if (item.type == 'DirectMessage') {
+          socket.emit(SocketEvents.MessageDeliveredConfirmation, item);
+        }
+      })
+
+      store.dispatch(updatelastReadTimestamp(data[0].timestamp));
+      socket.io.opts.query = "userId=" + session.userId + "&userName=" + session.username + "&lastMessageTimeStamp=" + data[0].timestamp;
+      store.dispatch(persistCurrentSession());
+    }
+
   });
   socket.on(SocketEvents.MessageSentConfirmation, (data) => {
     store.dispatch(confirmMessageSent(data))
