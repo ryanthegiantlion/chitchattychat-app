@@ -307,7 +307,7 @@ export function confirmMessageSent(message) {
 		dispatch(markMessageAsSent(message));
 
 		AsyncStorage.setItem('messages', JSON.stringify(getState().messages)) 
-			.then((value) => console.log('Added messages to storage'))
+			//.then((value) => console.log('Added messages to storage'))
 			.catch((err) => console.log('Error adding messages to storage: ' + err));
 	}
 }
@@ -317,7 +317,7 @@ export function confirmMessageDelivered(messages) {
 		dispatch(markMessageAsDelivered(messages));
 
 		AsyncStorage.setItem('messages', JSON.stringify(getState().messages)) 
-			.then((value) => console.log('Added messages to storage'))
+			//.then((value) => console.log('Added messages to storage'))
 			.catch((err) => console.log('Error adding messages to storage: ' + err));
 	}
 }
