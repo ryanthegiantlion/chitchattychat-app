@@ -4,7 +4,8 @@ import {
   StyleSheet,
   Text,
   View,
-  Platform
+  Platform,
+  Alert
 } from 'react-native';
 import { connect } from 'react-redux'
 
@@ -14,11 +15,26 @@ import { loadSession, loadMessages, getOfflineMessages } from './store/actions'
 var PushNotification = require('react-native-push-notification');
 
 console.log('configuring push notifications');
+Alert.alert(
+            'PUSH',
+            'registering for push',
+            [
+              {text: 'OK', onPress: () => console.log('OK Pressed!')},
+            ]
+          );
 PushNotification.configure({
 
     // (optional) Called when Token is generated (iOS and Android)
     onRegister: function(token) {
         console.log( 'TOKEN:', token );
+
+        Alert.alert(
+            'Alert Title',
+            token,
+            [
+              {text: 'OK', onPress: () => console.log('OK Pressed!')},
+            ]
+          );
     },
 
     // (required) Called when a remote or local notification is opened or received
