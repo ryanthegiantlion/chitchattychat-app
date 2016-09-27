@@ -19,7 +19,8 @@ const initialState = {
       type: 'Group',
       chatId: 0,
       userId: null,
-      name: 'General'
+      name: 'General',
+      pushToken: null
     }
   }},
   session: {},

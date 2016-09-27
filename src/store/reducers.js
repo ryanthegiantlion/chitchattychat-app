@@ -35,7 +35,7 @@ function ui(state = {currentRoute: 'loading', chatUI: {isMenuVisible: false, sel
 	}
 }
 
-function session(state = {userId: null, username: null, isLoggedIn: null}, action) {
+function session(state = {userId: null, username: null, isLoggedIn: null, pushToken: null}, action) {
 	switch (action.type) {
 		case actions.LOGIN: 
 			return Object.assign({}, state, 
@@ -44,6 +44,7 @@ function session(state = {userId: null, username: null, isLoggedIn: null}, actio
 				username: action.username,
 				isLoggedIn: true,
 				lastMessageTimestamp: null,
+				pushToken: state.pushToken
 			})
 		case actions.UPDATE_LAST_READ_TIMESTAMP:
 			return Object.assign({}, state, 
@@ -52,7 +53,8 @@ function session(state = {userId: null, username: null, isLoggedIn: null}, actio
 				username: state.username,
 				isLoggedIn: state.isLoggedIn,
 				lastMessageTimestamp: state.lastMessageTimestamp && (state.lastMessageTimestamp > action.timestamp) ?
-					state.lastMessageTimestamp : action.timestamp
+					state.lastMessageTimestamp : action.timestamp,
+				pushToken: state.pushToken
 			})
 		case actions.ADD_SESSION:
 			return Object.assign({}, state, 
@@ -60,7 +62,17 @@ function session(state = {userId: null, username: null, isLoggedIn: null}, actio
 				userId: action.userId,
 				username: action.username,
 				isLoggedIn: action.isLoggedIn,
-				lastMessageTimestamp: action.lastMessageTimestamp
+				lastMessageTimestamp: action.lastMessageTimestamp,
+				pushToken: action.pushToken
+			})
+		case actions.UPDATE_PUSH_TOKEN:
+			return Object.assign({}, state,
+			{
+				userId: state.userId,
+				username: state.username,
+				isLoggedIn: state.isLoggedIn,
+				lastMessageTimestamp: state.lastMessageTimestamp,
+				pushToken: action.pushToken
 			})
 		default:
 			return state

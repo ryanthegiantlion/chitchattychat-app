@@ -1,7 +1,9 @@
 var ReactNative = require('react-native');
 var config = require('../config').config;
 
-var { AsyncStorage, Alert } = ReactNative;
+var { AsyncStorage, Alert, Platform } = ReactNative;
+
+var PushNotification = require('react-native-push-notification');
 
 // endpoints
 
@@ -18,6 +20,7 @@ export const LOGOUT = 'LOGOUT'
 export const ADD_SESSION = 'ADD_SESSION'
 export const LOAD_SESSION = 'LOAD_SESSION'
 export const UPDATE_LAST_READ_TIMESTAMP = 'UPDATE_LAST_READ_TIMESTAMP'
+export const UPDATE_PUSH_TOKEN = 'UPDATE_PUSH_TOKEN'
 
 export const ADD_USERS = 'ADD_USERS'
 export const UPDATE_ONLINE_USERS = 'UPDATE_ONLINE_USERS'
@@ -96,10 +99,9 @@ export function login(username) {
 			body: body
 		})
 		.then((response) => response.json())
-		.then(function(responseJson) {
-				dispatch(persistSession(responseJson._id, responseJson.userName))
-				.then(() => dispatch(changeRoute('chat')));
-			})
+		.then((responseJson) => dispatch(persistSession(responseJson._id, responseJson.userName)))
+		.then(() => dispatch(registerPush()))
+		.then(() => dispatch(changeRoute('chat')))
 		.catch((error) => { console.warn(error) });
 	}
 }
@@ -110,7 +112,7 @@ export function loadSession() {
 		.then((value) => {
 			if (value) {
 				let sessionObj = JSON.parse(value);
-				dispatch(addSession(sessionObj.userId, sessionObj.username, sessionObj.lastMessageTimestamp))
+				dispatch(addSession(sessionObj.userId, sessionObj.username, sessionObj.lastMessageTimestamp, sessionObj.pushToken))
 				dispatch(changeRoute('chat'))
 				dispatch(loadMessages())
 			}
@@ -148,6 +150,8 @@ export function persistCurrentSession() {
 
 export function persistSession(userId, username) {
 	return function(dispatch) {
+		// TODO: do this after
+		//dispatch(addSession(userId, username));
 		return AsyncStorage.setItem('session', JSON.stringify({userId: userId, username: username}))
 		.then((value) => {
 			dispatch(addSession(userId, username));
@@ -156,13 +160,14 @@ export function persistSession(userId, username) {
 	}
 }
 
-export function addSession(userId, username, lastMessageTimestamp) {
+export function addSession(userId, username, lastMessageTimestamp, pushToken) {
 	return {
 		type: ADD_SESSION,
 		userId: userId,
 		username: username,
 		lastMessageTimestamp: lastMessageTimestamp,
-		isLoggedIn: true
+		isLoggedIn: true,
+		pushToken: pushToken
 	}
 }
 
@@ -170,6 +175,76 @@ export function updatelastReadTimestamp(timestamp) {
 	return {
 		type: UPDATE_LAST_READ_TIMESTAMP,
 		timestamp: timestamp
+	}
+}
+
+export function updatePushToken(pushToken) {
+	return {
+		type: UPDATE_PUSH_TOKEN,
+		pushToken: pushToken
+	}
+}
+
+export function registerPush() {
+	console.log('configuring push notifications');
+	return function(dispatch) {
+		PushNotification.configure({
+
+		    // (optional) Called when Token is generated (iOS and Android)
+		    onRegister: function(token) {
+		      console.log( 'TOKEN:', token.token );
+		      dispatch(updatePushToken(token.token));
+					dispatch(persistCurrentSession());
+					dispatch(syncUser());
+		    },
+
+		    // (required) Called when a remote or local notification is opened or received
+		    onNotification: function(notification) {
+		        console.log( 'NOTIFICATION:', notification );
+		    },
+
+		    // ANDROID ONLY: GCM Sender ID (optional - not required for local notifications, but is need to receive remote push notifications) 
+		    senderID: "557529873800",
+
+		    // IOS ONLY (optional): default: all - Permissions to register.
+		    permissions: {
+		        alert: true,
+		        badge: true,
+		        sound: true
+		    },
+
+		    // Should the initial notification be popped automatically
+		    // default: true
+		    popInitialNotification: true,
+
+		    /**
+		      * (optional) default: true
+		      * - Specified if permissions (ios) and token (android and ios) will requested or not,
+		      * - if not, you must call PushNotificationsHandler.requestPermissions() later
+		      */
+		    requestPermissions: true,
+		});
+	}
+}
+
+export function syncUser() {
+	return function (dispatch, getState) {
+		var currentSession = getState().session;
+
+		var body = JSON.stringify({
+			'userName': currentSession.username,
+			'pushToken': currentSession.pushToken,
+			'platform': Platform.OS
+		});
+		fetch(apiUrl + '/users', {
+			method: 'POST',
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json; charset=UTF-8',
+			},
+			body: body
+		})
+		.catch((error) => { console.warn(error) });
 	}
 }
 
@@ -185,11 +260,11 @@ export function addUsers(users) {
 export function loadUsers() {
 	return function(dispatch) {
 		AsyncStorage.getItem('users')
-		.then((value) => JSON.parse(value))
-		.then((users) => {
-			dispatch(addUsers(users))
-		})
-		.catch((error) => { console.log('error getting users: ' + error) });
+			.then((value) => JSON.parse(value))
+			.then((users) => {
+				dispatch(addUsers(users))
+			})
+			.catch((error) => { console.log('error getting users: ' + error) });
 	}
 }
 

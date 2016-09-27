@@ -1,4 +1,4 @@
-development = false
+development = true
 
 if (development) {
 	config = {
