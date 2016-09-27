@@ -1,4 +1,5 @@
-package com.reactnativechat;
+//package com.reactnativechat;
+package com.ryanharmuth.ryantestapp;
 
 import com.facebook.react.ReactActivity;
 import com.oblador.vectoricons.VectorIconsPackage;

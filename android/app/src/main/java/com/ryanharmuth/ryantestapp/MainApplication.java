@@ -1,4 +1,5 @@
-package com.reactnativechat;
+//package com.reactnativechat;
+package com.ryanharmuth.ryantestapp;
 
 import android.app.Application;
 import android.util.Log;
