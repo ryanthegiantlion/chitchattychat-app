@@ -4,8 +4,7 @@ import {
   StyleSheet,
   Text,
   View,
-  Platform,
-  Alert
+  Platform
 } from 'react-native';
 import { connect } from 'react-redux'
 
@@ -15,26 +14,11 @@ import { loadSession, loadMessages, getOfflineMessages } from './store/actions'
 var PushNotification = require('react-native-push-notification');
 
 console.log('configuring push notifications');
-Alert.alert(
-            'PUSH',
-            'registering for push',
-            [
-              {text: 'OK', onPress: () => console.log('OK Pressed!')},
-            ]
-          );
 PushNotification.configure({
 
     // (optional) Called when Token is generated (iOS and Android)
     onRegister: function(token) {
         console.log( 'TOKEN:', token );
-
-        Alert.alert(
-            'Alert Title',
-            token,
-            [
-              {text: 'OK', onPress: () => console.log('OK Pressed!')},
-            ]
-          );
     },
 
     // (required) Called when a remote or local notification is opened or received
@@ -43,7 +27,7 @@ PushNotification.configure({
     },
 
     // ANDROID ONLY: GCM Sender ID (optional - not required for local notifications, but is need to receive remote push notifications) 
-    senderID: "YOUR GCM SENDER ID",
+    senderID: "557529873800",
 
     // IOS ONLY (optional): default: all - Permissions to register.
     permissions: {
